@@ -1,19 +1,16 @@
-import sys
-import os
-
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 import streamlit as st
+import pandas as pd
 import plotly.express as px
 import streamlit.components.v1 as components
 from pyvis.network import Network
 
-from data_loader import load_data
-from household_graph import build_household_graph
-from feature_engineering import build_features
-from ai_detection import detect_anomalies
-from pattern_detection import detect_patterns
-from graph_analysis import analyze_graph
-from risk_engine import calculate_risk
+from src.data_loader import load_data
+from src.household_graph import build_household_graph
+from src.feature_engineering import build_features
+from src.ai_detection import detect_anomalies
+from src.pattern_detection import detect_patterns
+from src.graph_analysis import analyze_graph
+from src.risk_engine import calculate_risk
 
 
 # ---------------------------------------------------
@@ -27,8 +24,7 @@ st.set_page_config(
 
 st.title("YOJANTRA: Household Welfare Fraud Intelligence System")
 
-st.markdown(
-"""
+st.markdown("""
 AI-powered platform for detecting welfare fraud using **household network intelligence**.
 
 Features:
@@ -37,17 +33,19 @@ Features:
 - AI anomaly detection
 - Risk scoring engine
 - Investigation dataset export
-"""
-)
+""")
 
 
 # ---------------------------------------------------
 # LOAD DATA
 # ---------------------------------------------------
 
-file_path = "data/welfare_fraud_detection_dummy_dataset.xlsx"
+@st.cache_data
+def get_data():
+    file_path = "data/welfare_fraud_detection_dummy_dataset.xlsx"
+    return load_data(file_path)
 
-citizens, households, properties, schemes, ration_cards = load_data(file_path)
+citizens, households, properties, schemes, ration_cards = get_data()
 
 
 # ---------------------------------------------------
@@ -204,7 +202,7 @@ for source, target, data in G.edges(data=True):
     relation = data.get("relation")
     net.add_edge(source, target, title=relation)
 
-net.save_graph("graph.html")
+net.write_html("graph.html")
 
 with open("graph.html", "r", encoding="utf-8") as f:
     components.html(f.read(), height=600)
@@ -291,7 +289,6 @@ st.dataframe(risk_info)
 
 st.subheader("Geographic Distribution of High-Risk Households")
 
-# Coordinates for cities
 city_coordinates = {
     "Pune": (18.5204, 73.8567),
     "Nashik": (19.9975, 73.7898),
@@ -299,14 +296,12 @@ city_coordinates = {
     "Delhi": (28.6139, 77.2090)
 }
 
-# Merge risk results with citizens to get address
 map_data = risk_results.merge(
     citizens[["household_id", "address"]],
     on="household_id",
     how="left"
 )
 
-# Convert address → coordinates
 map_data["lat"] = map_data["address"].map(
     lambda x: city_coordinates.get(x, (20.5937, 78.9629))[0]
 )
