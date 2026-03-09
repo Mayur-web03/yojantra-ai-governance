@@ -1,15 +1,19 @@
+import sys
+import os
+
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 import streamlit as st
 import plotly.express as px
 import streamlit.components.v1 as components
 from pyvis.network import Network
 
-from src.data_loader import load_data
-from src.household_graph import build_household_graph
-from src.feature_engineering import build_features
-from src.ai_detection import detect_anomalies
-from src.pattern_detection import detect_patterns
-from src.graph_analysis import analyze_graph
-from src.risk_engine import calculate_risk
+from data_loader import load_data
+from household_graph import build_household_graph
+from feature_engineering import build_features
+from ai_detection import detect_anomalies
+from pattern_detection import detect_patterns
+from graph_analysis import analyze_graph
+from risk_engine import calculate_risk
 
 
 # ---------------------------------------------------
